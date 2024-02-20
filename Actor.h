@@ -1,20 +1,22 @@
 #ifndef ACTOR_H_
 #define ACTOR_H_
-
 #include "GraphObject.h"
-#include "StudentWorld.h"
+class StudentWorld;
 
 class Actor: public GraphObject {
     public:
         Actor(StudentWorld* world, int ID, int startX, int startY, int startD, int startHealth);
-        virtual ~Actor() {}
+        virtual ~Actor();
         virtual void doSomething();
         void setDead();
         void setHealth(int amount);
         void setAttacked();
         void setAlive();
+        void setWorld(StudentWorld* world);
         void setDirection(int dir);
-        void handleDamage(int damage);
+        void setAsObstacle();
+        void decreaseHealth(int damage);
+        bool returnIfObstacle() const;
         int getHealth() const;
         int getDirection() const;
         int getIdentification() const;
@@ -24,8 +26,8 @@ class Actor: public GraphObject {
         StudentWorld* getWorld() const;
     private:
         StudentWorld* world;
-        int identification;
         bool isAlive;
+        bool isObstacle;
         bool isAttacked;
         //bool canMove; put in thiefbot and ragebot base class
         //bool playSound; //put in goodie base class
