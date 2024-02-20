@@ -1,8 +1,11 @@
 #include "Actor.h"
+#include "StudentWorld.h"
 #include "GameConstants.h"
 #include <iostream>
 #include <string>
 class Pea;
+class Avatar;
+class Wall;
 using namespace std;
 
 Actor::Actor(StudentWorld* world, int ID, int startX, int startY, int startD, int startHealth): GraphObject(ID, startX, startY, startD) {
@@ -11,6 +14,7 @@ Actor::Actor(StudentWorld* world, int ID, int startX, int startY, int startD, in
     health = startHealth;
     direction = startD;
     isObstacle = false;
+    setWorld(world);
 }
 Actor::~Actor() {}
 void Actor::setDead() {
@@ -49,6 +53,9 @@ bool Actor::isLiving() const {
 StudentWorld* Actor:: getWorld() const {
     return world;
 }
+void Actor::setWorld(StudentWorld* world) {
+    this->world = world;
+}
 void Actor::moveIfPossible(int x, int y) {
     if (!getWorld()->isObstacleAt(x, y))
         moveTo(x, y);
@@ -58,37 +65,12 @@ void Actor:: handleAttack() {}
 
 class Avatar: public Actor {
     public:
-        Avatar(StudentWorld* world, int startX, int startY): Actor(world, IID_PLAYER, startX, startY, right, 20), numPeas(20) {}
+        Avatar(StudentWorld* world, int startX, int startY);
         virtual ~Avatar() {}
         int getPeas() const {
             return numPeas;
         }
-        void firePea() {
-            int peaX = getX();
-            int peaY = getY();
-            numPeas -= 1;
-            switch (getDirection()) {
-                case up:
-                    peaY++;
-                    break;
-                case down:
-                    peaY--;
-                    break;
-                case left:
-                    peaX--;
-                    break;
-                default:
-                    peaX++;
-                    break;
-            }
-            if (!getWorld()->isObstacleAt(peaX, peaY)) {
-                cout << "Work on adding pea here";
-                //Pea* newPea = new Pea(getWorld(), peaX, peaY, getDirection());
-                //getWorld()->addObject(newPea);
-                //would I add peas by creating a pointer to a new pea inside Avatar and then sending that to a function in StudentWorld  that appends objects to the end of the list of obejcts? same for robot factoryy dispensing robots?
-            }
-            getWorld()->playSound(SOUND_PLAYER_FIRE);
-        }
+        void firePea();
         virtual void doSomething() {
             int key;
             if (!isLiving())
@@ -148,14 +130,42 @@ class Wall: public Actor {
         Wall(StudentWorld* world, int startX, int startY): Actor(world, IID_WALL, startX, startY, none, 0) {
             setAsObstacle();
         }
-        virtual ~Wall() {} //Do I need anything in destructor
+        virtual ~Wall() {}
 };
 
 class Pea: public Actor {
     public:
         Pea(StudentWorld* world, int startX, int startY, int direction): Actor(world, IID_PEA, startX, startY, direction, 1) {}
-    virtual ~Pea() {}
+        virtual ~Pea() {}
 };
+Avatar::Avatar(StudentWorld* world, int startX, int startY): Actor(world, IID_PLAYER, startX, startY, right, 20), numPeas(20) {}
+
+void Avatar::firePea() {
+    int peaX = getX();
+    int peaY = getY();
+    numPeas -= 1;
+    switch (getDirection()) {
+        case up:
+            peaY++;
+            break;
+        case down:
+            peaY--;
+            break;
+        case left:
+            peaX--;
+            break;
+        default:
+            peaX++;
+            break;
+    }
+    if (!getWorld()->isObstacleAt(peaX, peaY)) {
+        cout << "Work on adding pea here";
+        Pea* newPea = new Pea(getWorld(), peaX, peaY, getDirection());
+        getWorld()->addObject(newPea);
+        //would I add peas by creating a pointer to a new pea inside Avatar and then sending that to a function in StudentWorld  that appends objects to the end of the list of obejcts? same for robot factoryy dispensing robots?
+    }
+    getWorld()->playSound(SOUND_PLAYER_FIRE);
+}
 //setasobstacle for pit, robot factory and robot base class
 //exit: setVisible(false)
 //if I check that a robot can attack a player, how do I set player's isAttacked to true? Dont know how to access player from robot
