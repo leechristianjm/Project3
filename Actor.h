@@ -13,7 +13,6 @@ class Actor: public GraphObject {
         void setAttacked();
         void setAlive();
         void setWorld(StudentWorld* world);
-        void setDirection(int dir);
         void setAsObstacle();
         void decreaseHealth(int damage);
         bool returnIfObstacle() const;
@@ -34,5 +33,20 @@ class Actor: public GraphObject {
         int health;
         int direction;
 };
-
+class Wall: public Actor {
+    public:
+        Wall(StudentWorld* world, int startX, int startY);
+        virtual ~Wall();
+};
+class Avatar: public Actor {
+    public:
+        Avatar(StudentWorld* world, int startX, int startY);
+        virtual ~Avatar();
+        int getPeas() const;
+        void firePea();
+        virtual void doSomething();
+        virtual void handleAttack();
+    private:
+        int numPeas;
+};
 #endif // ACTOR_H_
