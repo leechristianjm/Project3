@@ -1,5 +1,4 @@
 #include "Actor.h"
-#include "StudentWorld.h"
 #include "GameConstants.h"
 #include <iostream>
 #include <string>
@@ -11,8 +10,9 @@ Actor::Actor(StudentWorld* world, int ID, int startX, int startY, int startD, in
     isAttacked = false;
     health = startHealth;
     direction = startD;
-    identification = ID;
+    isObstacle = false;
 }
+Actor::~Actor() {}
 void Actor::setDead() {
     isAlive = false;
 }
@@ -28,14 +28,17 @@ void Actor::setAlive() {
 void Actor::setDirection(int dir) {
     direction = dir;
 }
-void Actor::handleDamage(int damage) {
+void Actor::setAsObstacle() {
+    isObstacle = true;
+}
+bool Actor::returnIfObstacle() const {
+    return isObstacle;
+}
+void Actor::decreaseHealth(int damage) {
     health -= damage;
 }
 int Actor::getHealth() const {
     return health;
-}
-int Actor:: getIdentification() const {
-    return identification;
 }
 int Actor::getDirection() const {
     return direction;
@@ -50,6 +53,8 @@ void Actor::moveIfPossible(int x, int y) {
     if (!getWorld()->isObstacleAt(x, y))
         moveTo(x, y);
 }
+void Actor::doSomething() {}
+void Actor:: handleAttack() {}
 
 class Avatar: public Actor {
     public:
@@ -126,7 +131,7 @@ class Avatar: public Actor {
             }
         }
     virtual void handleAttack() {
-        handleDamage(2);
+        decreaseHealth(2);
         if (getHealth() > 0)
             getWorld()->playSound(SOUND_PLAYER_IMPACT);
         else {
@@ -140,7 +145,9 @@ class Avatar: public Actor {
 
 class Wall: public Actor {
     public:
-        Wall(StudentWorld* world, int startX, int startY): Actor(world, IID_WALL, startX, startY, none, 0) {}
+        Wall(StudentWorld* world, int startX, int startY): Actor(world, IID_WALL, startX, startY, none, 0) {
+            setAsObstacle();
+        }
         virtual ~Wall() {} //Do I need anything in destructor
 };
 
@@ -149,13 +156,15 @@ class Pea: public Actor {
         Pea(StudentWorld* world, int startX, int startY, int direction): Actor(world, IID_PEA, startX, startY, direction, 1) {}
     virtual ~Pea() {}
 };
-
+//setasobstacle for pit, robot factory and robot base class
 //exit: setVisible(false)
 //if I check that a robot can attack a player, how do I set player's isAttacked to true? Dont know how to access player from robot
 //actors have multiple actions like moving and shooting so whould I just create separate if statements into each doSomething()
 //for interactions like player pushing marble into a pit should I create a function in player, marble, or pit
 //do you know how to get around calling the same level everytime
 //like if I have     string curLevel = "level01.txt"; its just going to load the first level every time
+
 //I have a virtual handelAttack function in Avatar but where would I call this function?
 //error with adding peas
-//Why is spec telling to do setVisible(true) even when graph object's constructor has setVisible
+//Never make any class’s data members public or protected. You may make class constants public, protected or private. ??
+//If only some objects have hit points like Avatar and robots, should I put health points in the base Actor class or repeat having health points in both avatar and robot classe s
