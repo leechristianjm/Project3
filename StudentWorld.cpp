@@ -1,10 +1,6 @@
 #include "StudentWorld.h"
 #include "GameConstants.h"
 #include <string>
-class Wall;
-class Pea;
-class Avatar;
-class Actor;
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -19,23 +15,20 @@ StudentWorld::StudentWorld(string assetPath): GameWorld(assetPath), player(nullp
 StudentWorld::~StudentWorld() {
     cleanUp();
 }
-//Does level just completed is 99 mean getLevel() == 99
-//Is hardcoding like this okay?
-//Why error
 
 int StudentWorld::init() {
-    string curLevel = "level" + to_string(getLevel()) + ".txt";
+    string curLevel = "level0" + to_string(getLevel()) + ".txt";
     Level lev(assetPath());
     Level::LoadResult result = lev.loadLevel(curLevel);
-    if (result == Level::load_fail_file_not_found || getLevel() == 99)
+    if (result == Level::load_fail_file_not_found || getLevel() == 100)
         return GWSTATUS_PLAYER_WON;
     else if (result == Level:: load_fail_bad_format)
         return GWSTATUS_LEVEL_ERROR;
     else if (result == Level::load_success) {
         for (int x = 0; x < VIEW_WIDTH; x++) {
             for (int y = 0; y < VIEW_HEIGHT; y++) {
-                Level::MazeEntry x = lev.getContentsOf(x, y);
-                switch (x) {
+                Level::MazeEntry me = lev.getContentsOf(x, y);
+                switch (me) {
                     case Level::player:
                         player = new Avatar(this, x, y);
                         break;
@@ -52,7 +45,7 @@ int StudentWorld::init() {
                     case Level:: mean_thiefbot_factory:
                         break;
                     case Level:: wall:
-                        addObject(new Wall(x, y, this));
+                        addObject(new Wall(this, x, y));
                         break;
                     case Level:: marble:
                         break;
@@ -73,13 +66,28 @@ int StudentWorld::init() {
     return GWSTATUS_CONTINUE_GAME;
 }
 
-int StudentWorld::move()
-{
-    // This code is here merely to allow the game to build, run, and terminate after you type q
-
-    setGameStatText("Game will end when you type q");
-    
-	return GWSTATUS_CONTINUE_GAME;
+int StudentWorld::move() {
+    setGameStatText("Score: ");
+    //"Score: " + getScore() + " Level: " + getLevel() + " Lives: " + getLives() + " Health: " + get
+    //for health, ammo, bonus, would i use Avatar pointer to access them 
+    if (player->isLiving())
+        player->doSomething();
+    for (Actor* obj: actors) {
+        if (obj->isLiving()) {
+            obj->doSomething();
+            if (!player->isLiving())
+                return GWSTATUS_PLAYER_DIED;
+            //How to check if player completes a level
+            //how to know when to restart a level 
+        }
+    }
+    //Remove dead actors
+    //Reduce current bonus
+    //Check if player collects all crystals
+    if (!player->isLiving())
+        return GWSTATUS_PLAYER_DIED;
+    //Check if player completes level
+    return GWSTATUS_CONTINUE_GAME;
 }
 
 void StudentWorld::cleanUp() {
