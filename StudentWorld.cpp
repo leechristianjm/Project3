@@ -1,6 +1,10 @@
 #include "StudentWorld.h"
 #include "GameConstants.h"
 #include <string>
+class Wall;
+class Pea;
+class Avatar;
+class Actor;
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -18,6 +22,7 @@ StudentWorld::~StudentWorld() {
 //Does level just completed is 99 mean getLevel() == 99
 //Is hardcoding like this okay?
 //Why error
+
 int StudentWorld::init() {
     string curLevel = "level" + to_string(getLevel()) + ".txt";
     Level lev(assetPath());
@@ -32,21 +37,22 @@ int StudentWorld::init() {
                 Level::MazeEntry x = lev.getContentsOf(x, y);
                 switch (x) {
                     case Level::player:
-                        player = new Avatar(x, y, this);
+                        player = new Avatar(this, x, y);
                         break;
-                    case Level::empty:
+                    case Level:: empty:
                         break;
-                    case Level::exit:
+                    case Level:: exit:
                         break;
-                    case Level::horiz_ragebot:
+                    case Level:: horiz_ragebot:
                         break;
-                    case Level::vert_ragebot:
+                    case Level:: vert_ragebot:
                         break;
-                    case Level::thiefbot_factory:
+                    case Level:: thiefbot_factory:
                         break;
                     case Level:: mean_thiefbot_factory:
                         break;
                     case Level:: wall:
+                        addObject(new Wall(x, y, this));
                         break;
                     case Level:: marble:
                         break;
