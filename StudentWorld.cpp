@@ -107,7 +107,15 @@ int StudentWorld::move() {
     }
     if (player->isLiving())
         player->doSomething();
-    //Remove dead actors - traverse through list and check if health = 0
+    list<Actor*>::iterator itr = actors.begin();
+    while (itr != actors.end()) {
+        if (!(*itr)->isLiving()) {
+            delete *itr;
+            itr = actors.erase(itr);
+        }
+        else
+            itr++;
+    }
     if (getBonus() > 0)
         decreaseBonus();
     //Check if player collects all crystals and then expose exit
@@ -146,4 +154,16 @@ Actor* StudentWorld::isCollidableWith(int x, int y) const {
 
 void StudentWorld::addObject(Actor* object) {
     actors.push_back(object);
+}
+
+//Delete if unnecssarty
+void StudentWorld::removeObject(Actor* target) {
+    list<Actor*>::iterator itr = actors.begin();
+    while (itr != actors.end()) {
+        if (*itr == target) {
+            delete *itr;
+            itr = actors.erase(itr);
+        } else
+            itr++;
+    }
 }
