@@ -10,7 +10,6 @@ Actor::Actor(StudentWorld* world, int ID, int startX, int startY, int startD, in
     isAttacked = false;
     health = startHealth;
     direction = startD;
-    isObstacle = false;
     setWorld(world);
 }
 Actor::~Actor() {}
@@ -26,20 +25,17 @@ void Actor::setAttacked() {
 void Actor::setAlive() {
     isAlive = true;
 }
-void Actor::setAsObstacle() {
-    isObstacle = true;
+bool Actor::isObstacle() const {
+    return false;
 }
-bool Actor::returnIfObstacle() const {
-    return isObstacle;
+bool Actor::canbeAttacked() const {
+    return false;
 }
 void Actor::decreaseHealth(int damage) {
     health -= damage;
 }
 int Actor::getHealth() const {
     return health;
-}
-int Actor::getDirection() const {
-    return direction;
 }
 bool Actor::isLiving() const {
     return isAlive;
@@ -61,6 +57,10 @@ void Actor:: handleAttack() {}
 Avatar::Avatar(StudentWorld* world, int startX, int startY): Actor(world, IID_PLAYER, startX, startY, right, 20), numPeas(20) {}
 
 Avatar::~Avatar() {}
+
+bool Avatar::canbeAttacked() const {
+    return true;
+}
 
 int Avatar::getPeas() const {
     return numPeas;
@@ -121,16 +121,30 @@ void Avatar::handleAttack() { //avatar collides with smth
 }
 
 Wall::Wall(StudentWorld* world, int startX, int startY): Actor(world, IID_WALL, startX, startY, none, 0) {
-    setAsObstacle();
 }
 
 Wall::~Wall() {}
 
-class Pea: public Actor {
-    public:
-        Pea(StudentWorld* world, int startX, int startY, int direction): Actor(world, IID_PEA, startX, startY, direction, 1) {}
-        virtual ~Pea() {}
-};
+bool Wall::isObstacle() const {
+    cout << "BRO" << endl;
+    return true;
+}
+
+Pea::Pea(StudentWorld* world, int startX, int startY, int direction): Actor(world, IID_PEA, startX, startY, direction, 1) {}
+
+Pea::~Pea() {}
+
+void Pea::doSomething() {
+    if (!isLiving())
+        return;
+    Actor* target = getWorld()->isCollidableWith(getX(), getY());
+    if (target != nullptr) {
+        target->handleAttack(); //marble, robot, player
+        setDead();
+        return;
+        //Right now I have a canBeAttacked function that I override only for marble robot player and I have a StudentWorld function that returns if an object thats on the same square as Pea is marble robot or player but then I would have to create separate variables for wall and robot factory / is it good code implementation or would i need to create another class that wall and robot factory can derive from 
+    }
+}
 
 void Avatar::firePea() {
     int peaX = getX();
@@ -151,32 +165,42 @@ void Avatar::firePea() {
             break;
     }
     if (!getWorld()->isObstacleAt(peaX, peaY)) {
-        cout << "Work on adding pea here";
         Pea* newPea = new Pea(getWorld(), peaX, peaY, getDirection());
         getWorld()->addObject(newPea);
     }
     getWorld()->playSound(SOUND_PLAYER_FIRE);
 }
+
+bool Marble::canbeAttacked() const {
+    return true;
+}
+
+//figure out how to run demo
 //is it colliding - look at #7
 //collision method inside pea
 //studentworld - if colliding / pass peas current position and traverse current array - return ptr to other obj not pea
 //inside actor.cpp collide method -> decrease health
 
 //pea hits object - custom things / in actor have method in actor and inherited class overrides method 
-
-
+//add isPushable in Actor
+//collision detection
+//overlap - goodies with players or
+//class that means collidable -
+//Actor -> Collidable actors -> Actor(Player, goodies, marbles, pits, certain robots)
 
 
 //setasobstacle for pit, robot factory and robot base class
 //exit: setVisible(false)
+//exit: define canoverlap with #3
+//if u can overlap, then use handle overlap
+//see whats in common/have parent class for common stuff
+//player will interact with smth then make interactable lcass with shareing like overlapped actions
+//class hierarchy 
+
 //if I check that a robot can attack a player, how do I set player's isAttacked to true? Dont know how to access player from robot
 //actors have multiple actions like moving and shooting so whould I just create separate if statements into each doSomething()
 //for interactions like player pushing marble into a pit should I create a function in player, marble, or pit
-//do you know how to get around calling the same level everytime
-//like if I have     string curLevel = "level01.txt"; its just going to load the first level every time
 
-//I have a virtual handelAttack function in Avatar but where would I call this function?
-//error with adding peas
-//Never make any class’s data members public or protected. You may make class constants public, protected or private. ??
+
 //If only some objects have hit points like Avatar and robots, should I put health points in the base Actor class or repeat having health points in both avatar and robot classe s
 
