@@ -1,12 +1,9 @@
 #ifndef STUDENTWORLD_H_
 #define STUDENTWORLD_H_
 #include "GameWorld.h"
-#include "Level.h"
 #include <string>
 #include <list>
 #include "Level.h"
-class Wall;
-class Avatar;
 #include "Actor.h"
 using namespace std;
 
@@ -18,10 +15,16 @@ class StudentWorld : public GameWorld {
         virtual int move();
         virtual void cleanUp();
         void getWallX() const;
+        void setDisplayText();
+        string formatScore(int score, int level, int lives, int health, int ammo, int bonus) const;
         void getWallY() const;
-        bool isObstacleAt(int x, int y);
+        bool isObstacleAt(int x, int y) const;
         void addObject(Actor* object);
+        int getBonus() const;
+        void decreaseBonus();
+    Actor* isCollidableWith(int x, int y) const;
     private:
+        int levelBonus;
         std::list<Actor*> actors;
         Actor* player;
 };
