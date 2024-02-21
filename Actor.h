@@ -13,11 +13,10 @@ class Actor: public GraphObject {
         void setAttacked();
         void setAlive();
         void setWorld(StudentWorld* world);
-        void setAsObstacle();
+        virtual bool isObstacle() const;
+        virtual bool canbeAttacked() const;
         void decreaseHealth(int damage);
-        bool returnIfObstacle() const;
         int getHealth() const;
-        int getDirection() const;
         int getIdentification() const;
         bool isLiving() const;
         void moveIfPossible(int x, int y);
@@ -26,7 +25,6 @@ class Actor: public GraphObject {
     private:
         StudentWorld* world;
         bool isAlive;
-        bool isObstacle;
         bool isAttacked;
         //bool canMove; put in thiefbot and ragebot base class
         //bool playSound; //put in goodie base class
@@ -36,17 +34,36 @@ class Actor: public GraphObject {
 class Wall: public Actor {
     public:
         Wall(StudentWorld* world, int startX, int startY);
+        virtual bool isObstacle() const;
         virtual ~Wall();
 };
 class Avatar: public Actor {
     public:
         Avatar(StudentWorld* world, int startX, int startY);
         virtual ~Avatar();
-        int getPeas() const;
+        virtual bool canbeAttacked() const;
+        int getPeas();
         void firePea();
         virtual void doSomething();
         virtual void handleAttack();
     private:
         int numPeas;
 };
+//have robot have virtual bool canbeAttacked();
+class Marble: public Actor {
+    public:
+        Marble(StudentWorld* world, int startX, int startY);
+        virtual ~Marble();
+        virtual bool canbeAttacked() const;
+        virtual void doSomething();
+    private:
+        int numPeas;
+};
+class Pea: public Actor {
+    public:
+        Pea(StudentWorld* world, int startX, int startY, int direction);
+        virtual ~Pea();
+        virtual void doSomething();
+};
 #endif // ACTOR_H_
+
