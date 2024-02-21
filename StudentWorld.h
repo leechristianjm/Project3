@@ -22,11 +22,12 @@ class StudentWorld : public GameWorld {
         void addObject(Actor* object);
         int getBonus() const;
         void decreaseBonus();
+    void removeObject(Actor* target);
     Actor* isCollidableWith(int x, int y) const;
     private:
         int levelBonus;
         std::list<Actor*> actors;
-        Actor* player;
+        Avatar* player;
 };
 
 #endif // STUDENTWORLD_H_
