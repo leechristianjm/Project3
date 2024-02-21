@@ -62,7 +62,7 @@ bool Avatar::canbeAttacked() const {
     return true;
 }
 
-int Avatar::getPeas() const {
+int Avatar::getPeas() {
     return numPeas;
 }
 
@@ -110,7 +110,7 @@ void Avatar:: doSomething() {
     
 }
 
-void Avatar::handleAttack() { //avatar collides with smth
+void Avatar::handleAttack() { //avatar collides with pea
     decreaseHealth(2);
     if (getHealth() > 0)
         getWorld()->playSound(SOUND_PLAYER_IMPACT);
@@ -123,10 +123,13 @@ void Avatar::handleAttack() { //avatar collides with smth
 Wall::Wall(StudentWorld* world, int startX, int startY): Actor(world, IID_WALL, startX, startY, none, 0) {
 }
 
+bool Wall::canbeAttacked() const {
+    return true;
+}
+
 Wall::~Wall() {}
 
 bool Wall::isObstacle() const {
-    cout << "BRO" << endl;
     return true;
 }
 
@@ -137,12 +140,28 @@ Pea::~Pea() {}
 void Pea::doSomething() {
     if (!isLiving())
         return;
+    damage();
+    switch (getDirection()) {
+        case up:
+            moveTo(getX(), getY()+1);
+            break;
+        case down:
+            moveTo(getX(), getY()-1);
+            break;
+        case left:
+            moveTo(getX()-1, getY());
+            break;
+        default:
+            moveTo(getX()+1, getY());
+    }
+    damage();
+}
+//Collidables are peas with actors, robots, walls, marbles, so should I create a class class for them like Collidables? 
+void Pea::damage() {
     Actor* target = getWorld()->isCollidableWith(getX(), getY());
     if (target != nullptr) {
-        target->handleAttack(); //marble, robot, player
+        target->handleAttack();
         setDead();
-        return;
-        //Right now I have a canBeAttacked function that I override only for marble robot player and I have a StudentWorld function that returns if an object thats on the same square as Pea is marble robot or player but then I would have to create separate variables for wall and robot factory / is it good code implementation or would i need to create another class that wall and robot factory can derive from 
     }
 }
 
@@ -171,22 +190,33 @@ void Avatar::firePea() {
     getWorld()->playSound(SOUND_PLAYER_FIRE);
 }
 
+Marble::Marble(StudentWorld* world, int startX, int startY): Actor(world, IID_MARBLE, startX, startY, none, 10) {
+}
+
+Marble::~Marble() {}
+
 bool Marble::canbeAttacked() const {
     return true;
 }
 
-//figure out how to run demo
-//is it colliding - look at #7
-//collision method inside pea
-//studentworld - if colliding / pass peas current position and traverse current array - return ptr to other obj not pea
-//inside actor.cpp collide method -> decrease health
+void Marble::handleAttack() { //marble collides with pea
+    decreaseHealth(2);
+    if (getHealth() <= 0) {
+        setDead();
+    }
+}
 
-//pea hits object - custom things / in actor have method in actor and inherited class overrides method 
+//is marble on top of player
+//studentworld 0- check marbleplayer overlap amd return player pointer
+//call method in marbles dosomething(
+
+//figure out how to run demo
+
 //add isPushable in Actor
 //collision detection
 //overlap - goodies with players or
 //class that means collidable -
-//Actor -> Collidable actors -> Actor(Player, goodies, marbles, pits, certain robots)
+//Actor -> Collidable actors -> Actor(Player, goodies, marbles, pits, certain robots) /would peas go in here because peas technically arent actors
 
 
 //setasobstacle for pit, robot factory and robot base class
